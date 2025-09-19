@@ -1,4 +1,4 @@
-import { DataTypes, type Model } from 'sequelize';
+import { DataTypes, Dialect, type Model } from 'sequelize';
 import type { ModelConstructor } from '../types/model-constructor.type';
 
 /**
@@ -16,7 +16,7 @@ export interface IConnection {
   /**
    * Type connection
    */
-  type: string;
+  dialect: Dialect;
   /**
    * Port
    */
@@ -33,6 +33,10 @@ export interface IConnection {
    * Password
    */
   password: string;
+  /**
+   * Database
+   */
+  database: string;
 }
 
 /**
@@ -57,7 +61,7 @@ const ConnectionModel: ModelConstructor<
         type: DataTypes.CHAR(15),
         allowNull: false,
       },
-      type: {
+      dialect: {
         type: DataTypes.CHAR(10),
         allowNull: false,
       },
@@ -77,6 +81,10 @@ const ConnectionModel: ModelConstructor<
         type: DataTypes.CHAR(255),
         allowNull: false,
       },
+      database: {
+        type: DataTypes.CHAR(60),
+        allowNull: false,
+      }
     },
     {
       tableName: 'stx_connections',

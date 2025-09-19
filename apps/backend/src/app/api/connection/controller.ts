@@ -1,5 +1,5 @@
 import { Controller, type IRequestHandler } from '@stexcore/api-engine';
-import ConnectionsService from '@/services/connections.service';
+import ConnectionsService from '../../../services/connections.service';
 
 /**
  * Handle connections

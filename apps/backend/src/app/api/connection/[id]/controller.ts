@@ -1,5 +1,5 @@
 import { Controller, type IRequestHandler } from '@stexcore/api-engine';
-import ConnectionsService from '@/services/connections.service';
+import ConnectionsService from '../../../../services/connections.service';
 import { notFound } from '@stexcore/http-status';
 
 /**
@@ -42,10 +42,7 @@ export default class ConnectionController extends Controller {
     try {
       // Create connection
       const id = parseInt(req.params['id']);
-      const [nAffecteds] = await this.connections.updateConnection(
-        id,
-        req.body,
-      );
+      const nAffecteds = await this.connections.updateConnection(id, req.body);
 
       if (!nAffecteds)
         throw notFound("Connection '" + req.params['id'] + "' not found!");

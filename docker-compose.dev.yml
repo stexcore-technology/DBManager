@@ -1,0 +1,59 @@
+services:
+  backend:
+    build:
+      context: ./apps/backend/
+      dockerfile: Dockerfile
+      target: builder
+    container_name: db-manager-server-dev
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./apps/backend/.env
+    volumes:
+      - ./apps/backend:/app
+      - /app/node_modules
+    command: npm run dev
+    restart: unless-stopped
+
+    depends_on:
+      - mysql
+      - postgres
+      - sqlserver
+
+  mysql:
+    image: mysql:8.0
+    container_name: db-manager-mysql-dev
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db
+    volumes:
+      - ./.data/mysql:/var/lib/mysql
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    container_name: db-manager-postgres-dev
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: db
+    volumes:
+      - ./.data/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: db-manager-sqlserver-dev
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "RootPassword123!"
+      MSSQL_PID: "Developer"
+    volumes:
+      - ./.data/sqlserver:/var/opt/mssql
+    restart: unless-stopped

@@ -1,4 +1,5 @@
-import ConnectionModel, { IConnection } from '@/models/connection.model';
+import { DBConnection } from '../classes/DBConnection';
+import ConnectionModel, { IConnection } from '../models/connection.model';
 import { Service } from '@stexcore/api-engine';
 
 /**
@@ -9,6 +10,18 @@ export default class ConnectionsService extends Service {
    * Connection Model Instance
    */
   private Connection = this.model$(ConnectionModel);
+
+  private connections: DBConnection[] = [];
+
+  onInit() {
+    setTimeout(async () => {
+      const connectionsData = await this.Connection.findAll();
+
+      this.connections = connectionsData.map(
+        (connectionData) => new DBConnection(connectionData.toJSON()),
+      );
+    }, 1000);
+  }
 
   /**
    * Get all connections
@@ -32,15 +45,41 @@ export default class ConnectionsService extends Service {
    * @param data Data connection
    * @returns connection created
    */
-  public createConnection(data: Omit<IConnection, 'id'>) {
-    return this.Connection.create(data);
+  public async createConnection(data: Omit<IConnection, 'id'>) {
+    // Create a new connection
+    const connectionData = await this.Connection.create(data);
+    const connection = new DBConnection(connectionData.toJSON());
+
+    this.connections.push(connection);
+
+    return connectionData;
   }
 
-  public updateConnection(id: number, data: Partial<IConnection>) {
-    return this.Connection.update(data, { where: { id } });
+  public async updateConnection(id: number, data: Partial<IConnection>) {
+    const [nAffecteds] = await this.Connection.update(data, { where: { id } });
+
+    const connection = this.connections.find(
+      (connection) => connection.id === id,
+    );
+
+    if (connection) {
+      connection.updateConfig(data);
+    }
+
+    return nAffecteds;
   }
 
-  public deleteConnection(id: number) {
-    return this.Connection.destroy({ where: { id } });
+  public async deleteConnection(id: number) {
+    const nAffecteds = await this.Connection.destroy({ where: { id } });
+
+    const index = this.connections.findIndex(
+      (connection) => connection.id === id,
+    );
+
+    if (index !== -1) {
+      this.connections.splice(index, 1);
+    }
+
+    return nAffecteds;
   }
 }
